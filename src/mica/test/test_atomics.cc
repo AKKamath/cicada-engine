@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <thread>
+#include <stdlib.h>
 #include "mica/util/lcore.h"
 #include "mica/util/zipf.h"
 #include "mica/util/stopwatch.h"
