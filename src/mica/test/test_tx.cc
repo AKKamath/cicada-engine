@@ -390,14 +390,14 @@ int main(int argc, const char* argv[]) {
   uint64_t num_threads = static_cast<uint64_t>(atol(argv[6]));
 
   Alloc alloc(config.get("alloc"));
-  auto page_pool_size = 24 * uint64_t(1073741824);
+  auto page_pool_size = 64 * uint64_t(2097152);
   PagePool* page_pools[2];
   // if (num_threads == 1) {
   //   page_pools[0] = new PagePool(&alloc, page_pool_size, 0);
   //   page_pools[1] = nullptr;
   // } else {
   page_pools[0] = new PagePool(&alloc, page_pool_size / 2, 0);
-  page_pools[1] = new PagePool(&alloc, page_pool_size / 2, 1);
+  //page_pools[1] = new PagePool(&alloc, page_pool_size / 2, 1);
   // }
 
   ::mica::util::lcore.pin_thread(0);
@@ -550,11 +550,13 @@ int main(int argc, const char* argv[]) {
         return 0;
       });
     }
+    printf("join threads\n");
 
     while (threads.size() > 0) {
       threads.back().join();
       threads.pop_back();
     }
+    printf("finish join threads\n");
 
     // TODO: Use multiple threads to renew rows for more balanced memory access.
 
