@@ -38,11 +38,11 @@ mnthuge=/mnt/huge
 disable_oom_kills()
 {
 	echo "Disabling OOM kills"
-	sudo sysctl -q -w vm.overcommit_memory=1
+	 sysctl -q -w vm.overcommit_memory=1
 
 	# This is OK for [8192, 8192] page configuration.
-	sudo sysctl -q -w kernel.shmmax=34359738368
-	sudo sysctl -q -w kernel.shmall=34359738368
+	 sysctl -q -w kernel.shmmax=34359738368
+	 sysctl -q -w kernel.shmall=34359738368
 }
 
 drop_shm()
@@ -51,7 +51,7 @@ drop_shm()
 
 	for i in $(ipcs -m | awk '{ print $1; }'); do
 		if [[ $i =~ 0x.* ]]; then
-			sudo ipcrm -M $i 2>/dev/null
+			 ipcrm -M $i 2>/dev/null
 		fi
 	done
 }
@@ -61,13 +61,13 @@ drop_cache()
 	echo "Dropping the page cache"
 
 	echo "echo 3 > /proc/sys/vm/drop_caches" > .echo_tmp
-	sudo sh .echo_tmp
+	 sh .echo_tmp
 	rm -f .echo_tmp
 }
 
 setup_mmap_limits()
 {
-	sudo sysctl -q -w vm.max_map_count=2147483647
+	 sysctl -q -w vm.max_map_count=2147483647
 }
 
 remove_mnt_huge()
@@ -76,18 +76,18 @@ remove_mnt_huge()
 
 	#grep -s $mnthuge /proc/mounts > /dev/null
 	#if [ $? -eq 0 ] ; then
-	#	sudo umount $mnthuge
+	#	 umount $mnthuge
 	#fi
 
 	#if [ -d $mnthuge ] ; then
-	#	sudo rm -R $mnthuge
+	#	 rm -R $mnthuge
 	#fi
 
 	echo "Unmounting hugetlbfs"
 	for target in `mount -t hugetlbfs | awk '{ print $3 }'`; do
-		sudo umount $target
+		 umount $target
 		if [ -d $target ] ; then
-			sudo rm -R $target
+			 rm -R $target
 		fi
 	done
 }
@@ -100,7 +100,7 @@ clear_huge_pages()
 	for d in /sys/devices/system/node/node? ; do
 		echo "echo 0 > $d/hugepages/hugepages-2048kB/nr_hugepages" >> .echo_tmp
 	done
-	sudo sh .echo_tmp
+	 sh .echo_tmp
 	rm -f .echo_tmp
 
 	remove_mnt_huge
@@ -110,11 +110,11 @@ create_mnt_huge()
 {
 	echo "Creating $mnthuge and mounting as hugetlbfs"
 
-	sudo mkdir -p $mnthuge
+	 mkdir -p $mnthuge
 
 	grep -s $mnthuge /proc/mounts > /dev/null
 	if [ $? -ne 0 ] ; then
-		sudo mount -t hugetlbfs nodev $mnthuge
+		 mount -t hugetlbfs nodev $mnthuge
 	fi
 }
 
@@ -131,7 +131,7 @@ set_numa_pages()
 		echo -n "Number of pages for $node: $Pages requested, "
 		shift
 		echo "echo $Pages > $d/hugepages/hugepages-2048kB/nr_hugepages" >> .echo_tmp
-	    sudo sh .echo_tmp
+	     sh .echo_tmp
 	    echo "$(cat "$d/hugepages/hugepages-2048kB/nr_hugepages") actual"
 	done
 	rm -f .echo_tmp
