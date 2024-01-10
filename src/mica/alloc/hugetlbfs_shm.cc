@@ -524,9 +524,10 @@ void HugeTLBFS_SHM::initialize() {
     }
   }
 
-  printf("HugeTLBFS_SHM: syncing and sleeping for 1 second\n");
+  printf("HugeTLBFS_SHM: syncing and sleeping for 100 microseconds\n");
+  fflush(stdout);
   sync();
-  sleep(1);
+  usleep(100);
 
   // {
   //   FILE* f = fopen("/proc/self/numa_maps", "r");
