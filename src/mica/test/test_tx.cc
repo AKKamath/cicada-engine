@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <thread>
 #include <random>
+#include <sys/socket.h>
 #include "mica/transaction/db.h"
 #include "mica/util/lcore.h"
 #include "mica/util/zipf.h"
@@ -747,6 +748,7 @@ int main(int argc, const char* argv[]) {
     if (phase == 0)
       printf("warming up\n");
     else {
+      recv(-5, NULL, 0, 0);
       db.reset_stats();
       printf("executing workload\n");
     }
@@ -774,6 +776,7 @@ int main(int argc, const char* argv[]) {
     }
   }
   printf("\n");
+  recv(-6, NULL, 0, 0);
 
   {
     double diff;
