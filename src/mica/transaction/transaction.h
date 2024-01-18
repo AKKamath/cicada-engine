@@ -65,6 +65,19 @@ class Transaction {
     };
   };
 
+  struct LazyDataCopier {
+    bool operator()(uint16_t cf_id, RowVersion<StaticConfig>* dest,
+                    const RowVersion<StaticConfig>* src) const {
+      (void)cf_id;
+      if (src != nullptr && dest->data_size != 0) {
+        assert(dest->data_size >= src->data_size);
+        memcpy(dest->data, src->data, src->data_size);
+        //memcpy_elide_clwb(dest->data, src->data, src->data_size);
+      }
+      return true;
+    };
+  };
+
   template <class DataCopier>
   bool new_row(RAH& rah, Table<StaticConfig>* tbl, uint16_t cf_id,
                uint64_t row_id, bool check_dup_access,

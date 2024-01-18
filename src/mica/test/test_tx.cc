@@ -229,14 +229,14 @@ void worker_proc(Task* task) {
           } else {
             if (is_rmw) {
               if (!rah.peek_row(tbl, 0, row_id, false, true, true) ||
-                  !rah.read_row() || !rah.write_row(kDataSize)) {
+                  !rah.read_row() || !rah.write_row(kDataSize, Transaction::LazyDataCopier())) {
                 tx.abort();
                 aborted = true;
                 break;
               }
             } else {
               if (!rah.peek_row(tbl, 0, row_id, false, false, true) ||
-                  !rah.write_row(kDataSize)) {
+                  !rah.write_row(kDataSize, Transaction::LazyDataCopier())) {
                 tx.abort();
                 aborted = true;
                 break;

@@ -260,7 +260,6 @@ rte_memcpy_func(void *dst, const void *src, size_t n) __attribute__((always_inli
 static inline void *
 rte_memcpy_func(void *dst, const void *src, size_t n)
 {
-	return memcpy(dst, src, n);
 	void *ret = dst;
 
 	/* We can't copy < 16 bytes using XMM registers so do it manually. */
