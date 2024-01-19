@@ -246,10 +246,10 @@ void worker_proc(Task* task) {
             char* data =
                 rah.data() + static_cast<uint64_t>(column_id) * kColumnSize;
             for (uint64_t j = 0; j < kColumnSize; j += 64) {
-              v += static_cast<uint64_t>(data[j]);
+              //v += static_cast<uint64_t>(data[j]);
               data[j] = static_cast<char>(v);
             }
-            v += static_cast<uint64_t>(data[kColumnSize - 1]);
+            //v += static_cast<uint64_t>(data[kColumnSize - 1]);
             data[kColumnSize - 1] = static_cast<char>(v);
           }
         } else {
