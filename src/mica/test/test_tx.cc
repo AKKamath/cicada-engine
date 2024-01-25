@@ -27,6 +27,9 @@ typedef ::mica::transaction::Result Result;
 
 static ::mica::util::Stopwatch sw;
 
+float write_frac = 1;
+bool use_ntstore = 0;
+
 // Worker task.
 
 struct Task {
@@ -242,15 +245,21 @@ void worker_proc(Task* task) {
                 break;
               }
             }
-
-            char* data =
-                rah.data() + static_cast<uint64_t>(column_id) * kColumnSize;
-            for (uint64_t j = 0; j < kColumnSize; j += 64) {
-              //v += static_cast<uint64_t>(data[j]);
-              data[j] = static_cast<char>(v);
+#define LLI long long int
+            char* data = rah.data() + static_cast<uint64_t>(column_id) * kColumnSize;
+            if(!use_ntstore) {
+              for (uint64_t j = 0; j < kColumnSize * write_frac; j += sizeof(LLI)) {
+                //v += static_cast<uint64_t>(data[j]);
+                *((LLI*)&data[j]) = static_cast<LLI>(v);
+              }
+              //v += static_cast<uint64_t>(data[kColumnSize - 1]);
+              //data[kColumnSize - 1] = static_cast<char>(v);
+            } else {
+              for (uint64_t j = 0; j < kColumnSize * write_frac; j += sizeof(LLI)) {
+                _mm_stream_si64((LLI*)&data[j], v);
+              }
             }
-            //v += static_cast<uint64_t>(data[kColumnSize - 1]);
-            data[kColumnSize - 1] = static_cast<char>(v);
+#undef LLI
           }
         } else {
           if (!kUseScan) {
@@ -373,7 +382,7 @@ void worker_proc(Task* task) {
 }
 
 int main(int argc, const char* argv[]) {
-  if (argc != 7) {
+  if (argc < 7) {
     printf(
         "%s NUM-ROWS REQS-PER-TX READ-RATIO ZIPF-THETA TX-COUNT "
         "THREAD-COUNT\n",
@@ -389,6 +398,10 @@ int main(int argc, const char* argv[]) {
   double zipf_theta = atof(argv[4]);
   uint64_t tx_count = static_cast<uint64_t>(atol(argv[5]));
   uint64_t num_threads = static_cast<uint64_t>(atol(argv[6]));
+  if(argc >= 8)
+    write_frac = atof(argv[7]);
+  if(argc >= 9)
+    use_ntstore = atoi(argv[8]);
 
   Alloc alloc(config.get("alloc"));
   auto page_pool_size = 64 * uint64_t(2097152);
