@@ -168,8 +168,8 @@ static constexpr uint64_t kContendedReqPerTX = 2;
 // static constexpr uint64_t kColumnSize = 100;
 // static constexpr uint64_t kDataSize = 1000;
 // static constexpr uint64_t kColumnSize = 100;
- static constexpr uint64_t kDataSize = 4096;
- static constexpr uint64_t kColumnSize = 4096;
+//static constexpr uint64_t kDataSize = 4096;
+//static constexpr uint64_t kColumnSize = 4096;
 //static constexpr uint64_t kDataSize = MAX_TUPLE_SIZE;
 //static constexpr uint64_t kColumnSize = MAX_TUPLE_SIZE / MICA_COLUMN_COUNT;
 

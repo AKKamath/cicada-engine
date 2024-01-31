@@ -29,6 +29,8 @@ static ::mica::util::Stopwatch sw;
 
 float write_frac = 1;
 bool use_ntstore = 0;
+uint64_t kDataSize = 4096;
+uint64_t kColumnSize = 4096;
 
 // Worker task.
 
@@ -402,15 +404,17 @@ int main(int argc, const char* argv[]) {
     write_frac = atof(argv[7]);
   if(argc >= 9)
     use_ntstore = atoi(argv[8]);
+  if(argc >= 10)
+    kDataSize = kColumnSize = atoi(argv[9]);
 
   Alloc alloc(config.get("alloc"));
-  auto page_pool_size = 64 * uint64_t(2097152);
+  auto page_pool_size = 32 * uint64_t(2097152);
   PagePool* page_pools[2];
   // if (num_threads == 1) {
   //   page_pools[0] = new PagePool(&alloc, page_pool_size, 0);
   //   page_pools[1] = nullptr;
   // } else {
-  page_pools[0] = new PagePool(&alloc, page_pool_size / 2, 0);
+  page_pools[0] = new PagePool(&alloc, page_pool_size, 0);
   //page_pools[1] = new PagePool(&alloc, page_pool_size / 2, 1);
   // }
 
@@ -438,6 +442,7 @@ int main(int argc, const char* argv[]) {
   printf("zipf_theta = %lf\n", zipf_theta);
   printf("tx_count = %" PRIu64 "\n", tx_count);
   printf("num_threads = %" PRIu64 "\n", num_threads);
+  printf("row_size = %" PRIu64 "\n", kDataSize);
 #ifndef NDEBUG
   printf("!NDEBUG\n");
 #endif
