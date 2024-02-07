@@ -72,6 +72,15 @@ struct Task {
   Timestamp* write_ts;
 } __attribute__((aligned(64)));
 
+// This function generates a random number using an LFSR.
+static uint64_t lfsr(uint64_t lfsr)
+{
+    lfsr ^= lfsr >> 7;
+    lfsr ^= lfsr << 9;
+    lfsr ^= lfsr >> 13;
+    return lfsr;
+}
+
 template <class StaticConfig>
 class VerificationLogger
     : public ::mica::transaction::LoggerInterface<StaticConfig> {
@@ -686,6 +695,7 @@ int main(int argc, const char* argv[]) {
             (uint32_t)(kReadModifyWriteRatio * (double)((uint32_t)-1));
 
         uint64_t req_offset = 0;
+        unsigned long lfsr_val = seed & seed_mask;
 
         for (uint64_t tx_i = 0; tx_i < tx_count; tx_i++) {
           bool read_only_tx = true;
@@ -702,7 +712,8 @@ int main(int argc, const char* argv[]) {
                                (num_rows - kContendedSetSize) +
                            kContendedSetSize;
               } else {
-                row_id = (zg.next() * 0x9ddfea08eb382d69ULL) % num_rows;
+                lfsr_val = lfsr(lfsr_val + 1);
+                row_id = lfsr_val % num_rows;//(zg.next() * 0x9ddfea08eb382d69ULL) % num_rows;
               }
               // Avoid duplicate row IDs in a single transaction.
               uint64_t req_j;
@@ -750,7 +761,7 @@ int main(int argc, const char* argv[]) {
   // For verification.
   std::vector<Timestamp> table_ts;
 
-  for (auto phase = 0; phase < 2; phase++) {
+  for (auto phase = 1; phase < 2; phase++) {
     // if (kVerify && phase == 0) {
     //   printf("skipping warming up\n");
     //   continue;
