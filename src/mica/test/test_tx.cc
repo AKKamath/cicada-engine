@@ -417,7 +417,7 @@ int main(int argc, const char* argv[]) {
     kDataSize = kColumnSize = atoi(argv[9]);
 
   Alloc alloc(config.get("alloc"));
-  auto page_pool_size = 32 * uint64_t(2097152);
+  auto page_pool_size = 80 * uint64_t(2097152);
   PagePool* page_pools[2];
   // if (num_threads == 1) {
   //   page_pools[0] = new PagePool(&alloc, page_pool_size, 0);
