@@ -28,7 +28,7 @@ typedef ::mica::transaction::Result Result;
 static ::mica::util::Stopwatch sw;
 
 float write_frac = 1;
-bool use_ntstore = 0;
+int write_op = 0;
 uint64_t kDataSize = 4096;
 uint64_t kColumnSize = 4096;
 
@@ -258,16 +258,21 @@ void worker_proc(Task* task) {
             }
 #define LLI long long int
             char* data = rah.data() + static_cast<uint64_t>(column_id) * kColumnSize;
-            if(!use_ntstore) {
+            if(write_op == 0) {
               for (uint64_t j = 0; j < kColumnSize * write_frac; j += sizeof(LLI)) {
                 //v += static_cast<uint64_t>(data[j]);
                 *((LLI*)&data[j]) = static_cast<LLI>(v);
               }
               //v += static_cast<uint64_t>(data[kColumnSize - 1]);
               //data[kColumnSize - 1] = static_cast<char>(v);
-            } else {
+            } else if(write_op == 1) {
               for (uint64_t j = 0; j < kColumnSize * write_frac; j += sizeof(LLI)) {
                 _mm_stream_si64((LLI*)&data[j], v);
+              }
+            } else if(write_op == 2) {
+              for (uint64_t j = 0; j < kColumnSize * write_frac; j += sizeof(LLI)) {
+                v += static_cast<uint64_t>(data[j]);
+                *((LLI*)&data[j]) = static_cast<LLI>(v);
               }
             }
 #undef LLI
@@ -412,9 +417,11 @@ int main(int argc, const char* argv[]) {
   if(argc >= 8)
     write_frac = atof(argv[7]);
   if(argc >= 9)
-    use_ntstore = atoi(argv[8]);
+    write_op = atoi(argv[8]);
   if(argc >= 10)
     kDataSize = kColumnSize = atoi(argv[9]);
+
+  assert(write_op <= 2);
 
   Alloc alloc(config.get("alloc"));
   auto page_pool_size = 80 * uint64_t(2097152);
